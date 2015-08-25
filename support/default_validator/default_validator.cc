@@ -147,7 +147,11 @@ int main(int argc, char **argv) {
 			if (!isfloat(team.c_str(), tval)) {
 				wrong_answer("Expected float, got: %s", team.c_str());
 			}
-			if(!(fabs(jval - tval) <= float_abs_tol) && 
+			if (isinf(jval)) {
+				if (jval != tval) {
+					wrong_answer("Expected infinite value.\nJudge: \"%s\"\nTeam: \"%s\"\n", judge.c_str(), team.c_str());
+				}
+			} else if(!(fabs(jval - tval) <= float_abs_tol) && 
 			   !(fabs(jval - tval) <= float_rel_tol*fabs(jval))) {
 				wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Difference: %le\n (abs tol %le rel tol %le)", 
 							 judge.c_str(), team.c_str(), jval-tval, float_abs_tol, float_rel_tol);
