@@ -45,6 +45,8 @@ def convert(problem, options=None):
         tex.ownerDocument.config['general']['copy-theme-extras'] = options.css
         if not options.headers:
             tex.ownerDocument.userdata['noheaders'] = True
+            print('NO HEADERS')
+        tex.ownerDocument.userdata['title'] = options.title
         tex.ownerDocument.config['files']['filename'] = destfile
         tex.ownerDocument.config['images']['filenames'] = 'img-$num(4)'
         tex.ownerDocument.config['images']['enabled'] = False
@@ -111,7 +113,7 @@ class ConvertOptions:
         ['language', 'store', '-l', '--language',
          'choose alternate language (2-letter code)', ''],
         ['title', 'store', '-T', '--title',
-         'set title (only used when there is no pre-existing template and -h not set)',
+         'set title (only used when there is no pre-existing template and -H not set)',
          'Problem Name'],
         ['loglevel', 'store', '-L', '--log-level',
          'set log level (debug, info, warning, error, critical)', 'warning'],
