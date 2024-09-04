@@ -48,6 +48,9 @@ def is_TLE(status: int, may_signal_with_usr1: bool=False) -> bool:
 def is_RTE(status: int) -> bool:
     return not os.WIFEXITED(status) or bool(os.WEXITSTATUS(status))
 
+def file_size_mb(filename: str) -> float:
+    return os.path.getsize(filename) / 1024.0 / 1024.0
+
 class SubmissionResult:
     def __init__(self, verdict: str, score: float|None=None, reason: str|None=None, additional_info: str|None=None):
         self.verdict = verdict
@@ -200,7 +203,7 @@ class TestCase(ProblemAspect):
             self.warning(f"The file {filename} does not end with '\\n'.")
 
     def check_size_limits(self, filename: str) -> None:
-        filesize = os.path.getsize(filename) / 1024.0 / 1024.0
+        filesize = file_size_mb(filename)
         if filesize > 1000:
              self.error(f'The file {filename} ({filesize:.1f} Mb) is larger than 1000 Mb and can not be installed.')
         elif filesize > 100:
@@ -223,7 +226,7 @@ class TestCase(ProblemAspect):
         self.check_size_limits(self.infile)
         self.check_size_limits(self.ansfile)
         self._problem.input_validators.validate(self)
-        anssize = os.path.getsize(self.ansfile) / 1024.0 / 1024.0
+        anssize = file_size_mb(self.ansfile)
         outputlim = self._problem.config.get('limits')['output']
         if anssize > outputlim:
             self.error(f'Answer file ({anssize:.1f} Mb) is larger than output limit ({outputlim} Mb), you need to increase output limit')
@@ -323,6 +326,18 @@ class TestCase(ProblemAspect):
         else:
             res_low = SubmissionResult('TLE')
             res = res_low
+
+        # Warn about OLE from a submission. This can happen with a custom output
+        # validator where the .ans file is not too large, but the output from a
+        # submission is too large. Graders do not accept OLE, so we warn about
+        # this instead of returning it as a judgement.
+        if res.verdict == 'AC':
+            anssize = file_size_mb(outfile)
+            outputlim = self._problem.config.get('limits')['output']
+            if anssize > outputlim:
+                self.error(f'Output size ({anssize:.1f} Mb) is larger than output limit ({outputlim} Mb), you need to increase output limit')
+            elif 2 * anssize > outputlim:
+                self.warning(f'Output size ({anssize:.1f} Mb) is within 50% of output limit ({outputlim} Mb), you might want to increase output limit')
 
         res.runtime = res_high.runtime
         res_low.runtime = res_high.runtime
