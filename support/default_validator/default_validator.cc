@@ -66,6 +66,13 @@ FILE *openfeedback(const char *feedbackdir, const char *feedback, const char *wh
 
 const char *USAGE = "Usage: %s judge_in judge_ans feedback_file [options] < user_out";
 
+std::string truncate(std::string const &s, size_t max_length=1000) {
+    if (s.size() > max_length) {
+        return s.substr(0, max_length) + std::string("... [truncated]");
+    }
+    return s;
+}
+
 int main(int argc, char **argv) {
 	if (argc < 4) {
 		judge_error(USAGE, argv[0]);
@@ -142,23 +149,23 @@ int main(int argc, char **argv) {
 				if (stdin_pos == 0) {
 					wrong_answer(
 						"User EOF while judge had more output; user output was empty.\n(Next judge token: %s)",
-						judge.c_str()
+						truncate(judge).c_str()
 					);
 				} else {
 					wrong_answer(
 						"User EOF while judge had more output; user output contained only whitespace.\n(Next judge token: %s)",
-						judge.c_str()
+						truncate(judge).c_str()
 					);
 				}
 			} else {
-				wrong_answer("User EOF while judge had more output\n(Next judge token: %s)", judge.c_str());
+				wrong_answer("User EOF while judge had more output\n(Next judge token: %s)", truncate(judge).c_str());
 			}
 		}
      
 		double jval, tval;
 		if (use_floats && isfloat(judge.c_str(), jval)) {
 			if (!isfloat(team.c_str(), tval)) {
-				wrong_answer("Expected float, got: %s", team.c_str());
+				wrong_answer("Expected float, got: %s", truncate(team).c_str());
 			}
 			if (!(fabs(jval - tval) <= float_abs_tol) &&
 			   !(fabs(jval - tval) <= float_rel_tol * fabs(jval))) {
@@ -167,11 +174,11 @@ int main(int argc, char **argv) {
 			}
 		} else if (case_sensitive) {
 			if (strcmp(judge.c_str(), team.c_str()) != 0) {
-				wrong_answer("String tokens mismatch\nJudge: \"%s\"\nUser: \"%s\"", judge.c_str(), team.c_str());
+				wrong_answer("String tokens mismatch\nJudge: \"%s\"\nUser: \"%s\"", truncate(judge).c_str(), truncate(team).c_str());
 			}
 		} else {
 			if (strcasecmp(judge.c_str(), team.c_str()) != 0) {
-				wrong_answer("String tokens mismatch\nJudge: \"%s\"\nUser: \"%s\"", judge.c_str(), team.c_str());
+				wrong_answer("String tokens mismatch\nJudge: \"%s\"\nUser: \"%s\"", truncate(judge).c_str(), truncate(team).c_str());
 			}
 		}
 		judgeans_pos += judge.length();
