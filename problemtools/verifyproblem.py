@@ -1158,6 +1158,7 @@ class Submissions(ProblemPart):
         for t in sorted(r.runtime for r in results if r.runtime > runtime_without_affecting_tl):
             if judge.judge(t)[-1].verdict == 'AC':
                 self.warning(f'{desc} is slower than all AC submissions. It needs {t:.2f}s to get AC')
+                return
 
     def _get_table_groups(self) -> list[TestCaseGroup]:
         """Return the groups to show as columns: expand any root child that has subgroups."""
