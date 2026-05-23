@@ -48,6 +48,16 @@ def _is_RTE(status: int) -> bool:
     return not os.WIFEXITED(status) or bool(os.WEXITSTATUS(status))
 
 
+def _rte_reason(status: int) -> str:
+    if os.WIFSIGNALED(status):
+        sig = os.WTERMSIG(status)
+        try:
+            return signal.Signals(sig).name
+        except ValueError:
+            return f'SIG{sig}'
+    return f'Exit {os.WEXITSTATUS(status)}'
+
+
 def _read_safe(path: Path) -> str | None:
     try:
         return path.read_text(errors='replace')
@@ -79,7 +89,7 @@ def _run_normal(
     if _is_TLE(status) or runtime > timelim:
         result = SubmissionResult('TLE')
     elif _is_RTE(status):
-        result = SubmissionResult('RTE', additional_info=_read_safe(errfile))
+        result = SubmissionResult('RTE', reason=_rte_reason(status), additional_info=_read_safe(errfile))
     else:
         result = _validate_output(testcase, outfile, output_validator, metadata, execution_dir, diag, infile=infile)
     result.runtime = runtime
@@ -148,7 +158,7 @@ def _run_interactive(
     elif _is_TLE(sub_status, may_signal_with_usr1=True) or sub_runtime > timelim:
         result = SubmissionResult('TLE')
     elif _is_RTE(sub_status):
-        result = SubmissionResult('RTE')
+        result = SubmissionResult('RTE', reason=_rte_reason(sub_status))
     else:
         result = _parse_validator_result(output_validator, val_status, feedback_dir, metadata)
 
