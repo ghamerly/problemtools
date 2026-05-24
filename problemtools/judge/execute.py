@@ -124,6 +124,7 @@ def _run_interactive(
             ['1', str(math.ceil(2 * timelim))]
             + output_validator.get_runcmd(memlim=metadata.limits.validation_memory)
             + [str(infile), str(testcase.ansfile_path), str(feedback_dir) + os.sep]
+            + testcase.output_validator_flags
             + [';']
             + sub.get_runcmd(memlim=metadata.limits.memory)
         ),
