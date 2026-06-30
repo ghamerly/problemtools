@@ -3,9 +3,8 @@ verification language (https://github.com/DOMjudge/checktestdata)
 """
 
 import os
-import shutil
+import sys
 from .executable import Executable
-from .errors import ProgramError
 
 
 class Checktestdata(Executable):
@@ -17,14 +16,11 @@ class Checktestdata(Executable):
         Args:
             path (str): path to .ctd source file
         """
-        pyctd = shutil.which('pyctd')
-        if pyctd is None:
-            raise ProgramError('Could not locate the Checktestdata program to run %s' % path)
-        super().__init__(pyctd, args=[path])
+        super().__init__(sys.executable, args=['-m', 'checktestdata', path])
 
     def __str__(self) -> str:
         """String representation"""
-        return '%s' % (self.args[0])
+        return '%s' % (self.args[-1])
 
     def do_compile(self) -> tuple[bool, str | None]:
         """Syntax-check the Checktestdata script
