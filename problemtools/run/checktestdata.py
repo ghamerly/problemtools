@@ -6,7 +6,6 @@ import os
 import shutil
 from .executable import Executable
 from .errors import ProgramError
-from .tools import get_tool_path
 
 
 class Checktestdata(Executable):
@@ -18,7 +17,7 @@ class Checktestdata(Executable):
         Args:
             path (str): path to .ctd source file
         """
-        pyctd = shutil.which("pyctd")
+        pyctd = shutil.which('pyctd')
         if pyctd is None:
             raise ProgramError('Could not locate the Checktestdata program to run %s' % path)
         super().__init__(pyctd, args=[path])
